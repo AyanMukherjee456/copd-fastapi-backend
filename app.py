@@ -36,6 +36,8 @@ class PatientInput(BaseModel):
     FVC_pct: float
     FEV1_FVC: float
     ChronicCough: int
+    ShortnessBreath: int
+    PriorHospitalization: int
     CRP_mg_L: float
     SpO2: float
 
