@@ -25,6 +25,23 @@ model_m1 = joblib.load("COPD_M1_randomforest.joblib")
 model_m2 = joblib.load("COPD_M2_gb_regressor.joblib")
 model_m3 = joblib.load("COPD_M3_risk_model.joblib")
 
+
+# ---------------- FEATURE ORDER (CRITICAL) ----------------
+FEATURE_ORDER = [
+    "Age",
+    "Gender",
+    "SmokingStatus",
+    "SmokingYears",
+    "BMI",
+    "FEV1_pct",
+    "FVC_pct",
+    "FEV1_FVC",
+    "ChronicCough",
+    "ShortnessBreath",
+    "PriorHospitalization",
+    "CRP_mg_L",
+    "SpO2"
+]
 # ---------------- INPUT SCHEMA ----------------
 class PatientInput(BaseModel):
     Age: int
@@ -40,11 +57,21 @@ class PatientInput(BaseModel):
     PriorHospitalization: int
     CRP_mg_L: float
     SpO2: float
-
+    
 # ---------------- API ENDPOINT ----------------
+
 @app.post("/predict")
 def predict_copd(data: PatientInput):
-    df = pd.DataFrame([data.dict()])
+    
+    #df = pd.DataFrame([data.dict()])
+    input_dict = data.dict()
+    
+    # Force correct feature order
+    df = pd.DataFrame([[input_dict[f] for f in FEATURE_ORDER]],
+                      columns=FEATURE_ORDER)
+
+
+
 
     copd_pred = int(model_m1.predict(df)[0])
     copd_prob = float(model_m1.predict_proba(df)[0][1])
