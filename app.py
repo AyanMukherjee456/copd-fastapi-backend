@@ -9,6 +9,19 @@ model_m2 = joblib.load("COPD_M2_gb_regressor.joblib")
 model_m3 = joblib.load("COPD_M3_risk_model.joblib")
 
 app = FastAPI(title="COPD Prediction API")
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+        "*"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ---------------- INPUT SCHEMA ----------------
 class PatientInput(BaseModel):
@@ -41,8 +54,9 @@ def predict_copd(data: PatientInput):
     future_risk = float(model_m3.predict_proba(df)[0][1])
 
     return {
-        "COPD_Prediction": "COPD" if copd_pred == 1 else "NO_COPD",
-        "COPD_Probability": round(copd_prob * 100, 2),
-        "Severity_Percentage": round(severity, 2) if severity else None,
-        "Future_COPD_Risk": round(future_risk * 100, 2)
-    }
+    "copd_prediction": copd_pred,
+    "copd_probability": round(copd_prob * 100, 2),
+    "severity_percent": round(severity, 2) if severity is not None else None,
+    "future_copd_risk": round(future_risk * 100, 2)
+}
+
